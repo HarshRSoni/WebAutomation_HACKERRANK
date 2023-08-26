@@ -1,0 +1,87 @@
+const puppeteer = require("puppeteer");
+const Username = "harshrajsoni03"
+const password = "9977141103"
+let page;
+
+const codeObject = require('./codes');
+
+
+
+(async function(){
+    try {
+        const browserinstance = await puppeteer.launch({
+            headless: false,
+            slowMo: true,
+            defaultViewport: null,
+            args:["--start-maximized"]
+        })
+
+        let newTab = await browserinstance.newPage();
+        await newTab.goto("https://www.hackerrank.com/auth/login");
+        await newTab.type(".input#input-1[type='text']", Username, { delay: 50 });
+        await newTab.type("input[type='password']", password, { delay: 50 });
+        await newTab.click("button[type='submit']",{ delay: 50 });
+        await waitandClick("li.topic-card a[data-attr1='algorithms']",newTab);
+        //await waitandClick('input[value="warmup"]',newTab);
+        await newTab.waitForNavigation();
+        await newTab.goto("https://www.hackerrank.com/domains/algorithms?filters%5Bsubdomains%5D%5B%5D=warmup");
+
+        let allChallenges = await newTab.$$('.ui-btn.ui-btn-normal.primary-cta.ui-btn-line-primary.ui-btn-styled',{delay:50})
+        console.log("total questions" , allChallenges.length); 
+        await CodeSolver(newTab,allChallenges[1],codeObject.answers[1]);
+
+    } catch (error) {
+        console.log(error);
+    }
+})()
+ 
+
+
+
+
+async function waitandClick(selector,cpage){
+        try {
+            await cpage.waitForSelector(selector,{visible:true});
+            let SelectorClicked = await cpage.click(selector);
+            return SelectorClicked;
+        } catch (error) {
+            console.log(error);
+        }
+//     return new Promise(function(resolve,reject){
+//        let waitforModelPromise = cpage.waitForSelector(selector,{visible:true});
+//         waitforModelPromise.then(function(){
+//             let clickModel = cpage.click(selector);
+//             return clickModel
+//         }).then(function(){
+//             resolve();
+//         }).catch(function(err){
+//             console.log(err);
+            
+//         })
+//     })
+}
+
+async function CodeSolver(page,question,answer){
+        try {
+            
+            await question.click();
+            await waitandClick(".monaco-editor.no-user-select.vs",page);
+            await waitandClick(".checkbox-input",page)
+            await page.waitForSelector("textarea.custominput",page)
+            await page.type('textarea.custominput',answer,{delay:10})
+            await page.keyboard.down('Control')
+            await page.keyboard.press('A',{delay:100})
+            await page.keyboard.press('X',{delay:100})
+            await page.keyboard.up('Control')
+            await waitandClick(".monaco-editor.no-user-select.vs",page);
+            await page.keyboard.down('Control')
+            await page.keyboard.press('A',{delay:100})
+            await page.keyboard.press('V',{delay:100})
+            await page.keyboard.up('Control')
+            await page.click('.hr-monaco-submit',{delay:100})
+
+        } catch (error) {
+            console.log(error);
+        }
+
+}
